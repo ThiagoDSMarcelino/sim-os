@@ -1,26 +1,24 @@
 #ifndef TASKCONTROLBLOCK_H
 #define TASKCONTROLBLOCK_H
 
-#include <string>
-#include <vector>
+#include <QString>
 
 class TaskControlBlock
 {
 public:
-    TaskControlBlock(int id, std::string color, int start_time, int duration, int priority, std::vector<int> syscalls);
-    int get_id();
+    TaskControlBlock(QString id, QString color, int start_time, int duration, int priority);
+    QString get_id();
     int get_priority();
-    const std::string *get_color();
+    const QString *get_color();
     int get_start_time();
     int get_duration();
 
 private:
-    int id;
-    std::string color;
+    QString id;
+    QString color;
     int start_time;
     int duration;
     int priority;
-    std::vector<int> syscalls;
 };
 
 #endif // TASKCONTROLBLOCK_H

@@ -11,13 +11,11 @@ Simulator::Simulator(Scheduler* scheduler, int quantum, std::vector<TaskControlB
     this->scheduler = scheduler;
     this->quantum = quantum;
     this->instance = this;
-    qDebug() << "Instância do Simulador criada.";
 }
 
 Simulator::~Simulator()
 {
     delete this->scheduler;
-    qDebug() << "Instância do Simulador destruída.";
 }
 
 std::vector<QString> Simulator::load(const QString filePath)
@@ -56,6 +54,7 @@ std::vector<QString> Simulator::load(const QString filePath)
     }
 
     std::vector<QString> used_ids;
+    std::vector<TaskControlBlock *> tcb_list;
     while (!in.atEnd()) {
         line = in.readLine();
         values = line.split(";");
@@ -73,11 +72,42 @@ std::vector<QString> Simulator::load(const QString filePath)
             used_ids.push_back(id);
         }
 
+        QString color = values[1];
 
+        int start_time = values[2].toInt();
+        if (start_time < 0)
+        {
+            errors.push_back("Valores inteiros positivos são validos como tempo de ingresso");
+        }
 
+        int duration = values[3].toInt();
+        if (duration < 1)
+        {
+            errors.push_back("Valores inteiros positivos são validos como tempo de duração");
+        }
+
+        bool successfulParse;
+        int priority = values[4].toInt(&successfulParse);
+        if (!successfulParse) {
+            errors.push_back("Valores inteiros positivos são validos como prioridade");
+        }
+        else if (priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
+            errors.push_back("A prioridade deve ser um valor entre 0 e 99");
+        }
+
+        if (errors.empty())
+        {
+            tcb_list.push_back(new TaskControlBlock(id, color, start_time, duration, priority));
+        }
     }
 
     file.close();
+
+    if (!errors.empty()) {
+        return errors;
+    }
+
+    Simulator::instance = new Simulator(nullptr, quantum, tcb_list);
 
     return errors;
 }

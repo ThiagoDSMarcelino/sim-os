@@ -1,16 +1,15 @@
 #include "taskcontrolblock.h"
 
-TaskControlBlock::TaskControlBlock(int id, std::string color, int start_time, int duration, int priority, std::vector<int> syscalls)
+TaskControlBlock::TaskControlBlock(QString id, QString color, int start_time, int duration, int priority)
 {
     this->id = id;
     this->color = color;
     this->start_time = start_time;
     this->duration = duration;
     this->priority = priority;
-    this->syscalls = syscalls;
 }
 
-int TaskControlBlock::get_id()
+QString TaskControlBlock::get_id()
 {
     return this->id;
 }
@@ -20,7 +19,7 @@ int TaskControlBlock::get_priority()
     return this->priority;
 }
 
-const std::string *TaskControlBlock::get_color()
+const QString *TaskControlBlock::get_color()
 {
     return &this->color;
 }
