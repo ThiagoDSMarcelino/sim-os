@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "simulator.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -20,7 +21,15 @@ public:
 private slots:
     void on_selectFileButton_clicked();
 
+    void on_startSimulationButton_clicked();
+
+    void on_nextQuantumButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    Simulator *simulator;
+
+    void updateGanttChart();
 };
 #endif // MAINWINDOW_H

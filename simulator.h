@@ -23,10 +23,14 @@ private:
     std::vector<TaskControlBlock *> suspended_tasks;
     std::vector<TaskControlBlock *> loaded_tasks;
 
+    unsigned long long time;
+
 public:
     static std::vector<QString> load(const QString filePath);
     static void free();
     static Simulator* getInstance();
+    void start();
+    void runQuantum();
 };
 
 #endif // SIMULATOR_H

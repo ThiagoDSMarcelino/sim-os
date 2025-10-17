@@ -127,3 +127,13 @@ Simulator* Simulator::getInstance()
     Q_ASSERT_X(instance != nullptr, "Simulator::getInstance()", "A instância do simulador não foi criada. Chame Simulator::load() primeiro.");
     return instance;
 }
+
+void Simulator::start()
+{
+    this->time = 0;
+}
+
+void Simulator::runQuantum()
+{
+    this->time += this->quantum;
+}

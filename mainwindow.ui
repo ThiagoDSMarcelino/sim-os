@@ -16,20 +16,42 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QListWidget" name="messagesList"/>
-    </item>
-    <item>
-     <widget class="QPushButton" name="selectFileButton">
-      <property name="text">
-       <string>Selecionar arquivo de configuração</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="startSimulationButton">
-      <property name="text">
-       <string>Iniciar simulação</string>
-      </property>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QWidget" name="configPage">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QListWidget" name="messagesList"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="selectFileButton">
+          <property name="text">
+           <string>Selecionar arquivo de configuração</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="startSimulationButton">
+          <property name="text">
+           <string>Iniciar simulação</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="simulationPage">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QGraphicsView" name="graphicsView"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="nextQuantumButton">
+          <property name="text">
+           <string>Avançar</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
