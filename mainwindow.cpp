@@ -96,29 +96,26 @@ void MainWindow::updateGanttChart()
     const int TIME_HEADER = 20;
     const QColor RUNNING_COLOR = Qt::cyan;
 
-    int tasksSize = 5;
+    auto tasks = this->simulator->get_tasks();
     int currentTime = 20;
 
     int taskYPosition = TIME_HEADER;
 
-    for (int i = 0; i < tasksSize; i++)
-    {
-        QGraphicsTextItem* taskName = scene->addText("t1");
+    for (int i = tasks.size() - 1; i >= 0; i--) {
+        QGraphicsTextItem* taskName = scene->addText(tasks.at(i)->get_id());
         taskName->setPos(-50, taskYPosition + 5);
         taskYPosition += TASK_SPACING;
     }
 
     for (int time = 0; time < currentTime; ++time) {
         taskYPosition = TIME_HEADER;
-        int runningTaskID = time % tasksSize;
+        QString runningTaskID = tasks.front()->get_id();
 
-        for (int i = 0; i < tasksSize; i++) {
-            int taskID = i;
-
+        for (int i = tasks.size() - 1; i >= 0; i--) {
             QPen boxPen(Qt::gray);
             QBrush boxBrush;
 
-            if (taskID == runningTaskID) {
+            if (tasks.at(i)->get_id() == runningTaskID) {
                 boxPen.setColor(Qt::black);
                 boxBrush.setColor(RUNNING_COLOR);
                 boxBrush.setStyle(Qt::SolidPattern);

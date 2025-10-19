@@ -26,8 +26,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         simulator.h simulator.cpp
         taskcontrolblock.h taskcontrolblock.cpp
         scheduler.h scheduler.cpp
-        utils.cpp
-        utils.h
+
+
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET sim-os APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

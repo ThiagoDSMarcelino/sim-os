@@ -31,6 +31,7 @@ public:
     static Simulator* getInstance();
     void start();
     void runQuantum();
+    const std::vector<TaskControlBlock *> get_tasks();
 };
 
 #endif // SIMULATOR_H

@@ -114,8 +114,7 @@ std::vector<QString> Simulator::load(const QString filePath)
 
 void Simulator::free()
 {
-    if (instance == NULL)
-    {
+    if (instance == NULL) {
         return;
     }
 
@@ -136,4 +135,9 @@ void Simulator::start()
 void Simulator::runQuantum()
 {
     this->time += this->quantum;
+}
+
+const std::vector<TaskControlBlock *> Simulator::get_tasks()
+{
+    return this->loaded_tasks;
 }
