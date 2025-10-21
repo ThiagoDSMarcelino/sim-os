@@ -26,6 +26,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         simulator.h simulator.cpp
         taskcontrolblock.h taskcontrolblock.cpp
         scheduler.h scheduler.cpp
+        fcfs.h fcfs.cpp
+
 
 
     )

@@ -130,14 +130,32 @@ Simulator* Simulator::getInstance()
 void Simulator::start()
 {
     this->time = 0;
+    this->runQuantum();
 }
 
 void Simulator::runQuantum()
 {
+    auto it = this->loaded_tasks.begin();
+
+    while (it != this->loaded_tasks.end()) {
+        if ((*it)->get_start_time() <= this->time) {
+            this->scheduler->addTask((*it));
+
+            this->loaded_tasks.erase(it);
+            it--;
+        }
+        it++;
+    }
+
     this->time += this->quantum;
 }
 
-const std::vector<TaskControlBlock *> Simulator::get_tasks()
+const std::vector<TaskControlBlock *> Simulator::getTasks()
 {
     return this->loaded_tasks;
+}
+
+TaskControlBlock *Simulator::getRunningTask()
+{
+    return this->running_task;
 }

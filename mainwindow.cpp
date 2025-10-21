@@ -71,6 +71,8 @@ void MainWindow::on_startSimulationButton_clicked()
 
     ui->stackedWidget->setCurrentIndex(1);
 
+    this->simulator->start();
+
     updateGanttChart();
 }
 
@@ -96,7 +98,7 @@ void MainWindow::updateGanttChart()
     const int TIME_HEADER = 20;
     const QColor RUNNING_COLOR = Qt::cyan;
 
-    auto tasks = this->simulator->get_tasks();
+    auto tasks = this->simulator->getTasks();
     int currentTime = 20;
 
     int taskYPosition = TIME_HEADER;
@@ -109,7 +111,8 @@ void MainWindow::updateGanttChart()
 
     for (int time = 0; time < currentTime; ++time) {
         taskYPosition = TIME_HEADER;
-        QString runningTaskID = tasks.front()->get_id();
+        //QString runningTaskID = this->simulator->getRunningTask()->get_id();
+        QString runningTaskID = tasks.at(0)->get_id();
 
         for (int i = tasks.size() - 1; i >= 0; i--) {
             QPen boxPen(Qt::gray);

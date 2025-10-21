@@ -9,27 +9,27 @@ TaskControlBlock::TaskControlBlock(QString id, QString color, int start_time, in
     this->priority = priority;
 }
 
-QString TaskControlBlock::get_id()
+QString const TaskControlBlock::get_id()
 {
     return this->id;
 }
 
-int TaskControlBlock::get_priority()
+int const TaskControlBlock::get_priority()
 {
     return this->priority;
 }
 
-const QString *TaskControlBlock::get_color()
+const QString *const TaskControlBlock::get_color()
 {
     return &this->color;
 }
 
-int TaskControlBlock::get_start_time()
+int const TaskControlBlock::get_start_time()
 {
     return this->start_time;
 }
 
-int TaskControlBlock::get_duration()
+int const TaskControlBlock::get_duration()
 {
     return this->duration;
 }

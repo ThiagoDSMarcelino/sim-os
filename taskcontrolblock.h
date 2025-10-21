@@ -7,11 +7,11 @@ class TaskControlBlock
 {
 public:
     TaskControlBlock(QString id, QString color, int start_time, int duration, int priority);
-    QString get_id();
-    int get_priority();
-    const QString *get_color();
-    int get_start_time();
-    int get_duration();
+    QString const get_id();
+    int const get_priority();
+    const QString *const get_color();
+    int const get_start_time();
+    int const get_duration();
 
 private:
     QString id;
