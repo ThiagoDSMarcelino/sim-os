@@ -1,6 +1,7 @@
 #include "taskcontrolblock.h"
 
-TaskControlBlock::TaskControlBlock(QString id, QString color, int start_time, int duration, int priority)
+TaskControlBlock::TaskControlBlock(
+    QString id, QColor color, int start_time, int duration, int priority)
 {
     this->id = id;
     this->color = color;
@@ -19,9 +20,9 @@ int const TaskControlBlock::get_priority()
     return this->priority;
 }
 
-const QString *const TaskControlBlock::get_color()
+QColor const TaskControlBlock::get_color()
 {
-    return &this->color;
+    return this->color;
 }
 
 int const TaskControlBlock::get_start_time()

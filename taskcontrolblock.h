@@ -1,21 +1,22 @@
 #ifndef TASKCONTROLBLOCK_H
 #define TASKCONTROLBLOCK_H
 
+#include <QColor>
 #include <QString>
 
 class TaskControlBlock
 {
 public:
-    TaskControlBlock(QString id, QString color, int start_time, int duration, int priority);
+    TaskControlBlock(QString id, QColor color, int start_time, int duration, int priority);
     QString const get_id();
     int const get_priority();
-    const QString *const get_color();
+    QColor const get_color();
     int const get_start_time();
     int const get_duration();
 
 private:
     QString id;
-    QString color;
+    QColor color;
     int start_time;
     int duration;
     int priority;

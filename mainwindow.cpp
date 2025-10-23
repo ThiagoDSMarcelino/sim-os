@@ -3,8 +3,9 @@
 
 #include <QFileDialog>
 #include <QGraphicsTextItem>
-#include <QScreen>
 #include <QGuiApplication>
+#include <QScreen>
+#include "algorithm"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -99,29 +100,49 @@ void MainWindow::updateGanttChart()
     const QColor RUNNING_COLOR = Qt::cyan;
 
     auto tasks = this->simulator->getTasks();
-    int currentTime = this->simulator->getTime();
+    auto history = this->simulator->getHistory();
 
     int taskYPosition = TIME_HEADER;
 
+    // Set tasks ids at the left of the graph
     for (int i = tasks.size() - 1; i >= 0; i--) {
         QGraphicsTextItem* taskName = scene->addText(tasks.at(i)->get_id());
         taskName->setPos(-50, taskYPosition + 5);
         taskYPosition += TASK_SPACING;
     }
 
-    for (int time = 0; time < currentTime; ++time) {
-        taskYPosition = TIME_HEADER;
-        auto runningTask = this->simulator->getRunningTask();
+    int time = 0;
 
-        QString runningTaskID = runningTask != nullptr ? runningTask->get_id() : "";
+    // Draw the tasks blocks
+    for (auto history : this->simulator->getHistory()) {
+        taskYPosition = TIME_HEADER;
 
         for (int i = tasks.size() - 1; i >= 0; i--) {
             QPen boxPen(Qt::gray);
             QBrush boxBrush;
 
+            auto currentId = tasks.at(i)->get_id();
+            auto activeTasks = history.getActiveTasks();
+            auto it = std::find_if(activeTasks.begin(),
+                                   activeTasks.end(),
+                                   [currentId](TaskControlBlock *task) {
+                                       qDebug() << task->get_id() << " - " << currentId;
+                                       return task->get_id() == currentId;
+                                   });
+            qDebug() << "achou: " << (it != activeTasks.end());
+            qDebug();
+
+            if (it == activeTasks.end()) {
+                taskYPosition += TASK_SPACING;
+                continue;
+            }
+
+            QString runningTaskID = history.getRunningTask() ? history.getRunningTask()->get_id()
+                                                             : "";
+
             if (tasks.at(i)->get_id() == runningTaskID) {
                 boxPen.setColor(Qt::black);
-                boxBrush.setColor(RUNNING_COLOR);
+                boxBrush.setColor(tasks.at(i)->get_color());
                 boxBrush.setStyle(Qt::SolidPattern);
             } else {
                 boxBrush.setStyle(Qt::NoBrush);
@@ -130,11 +151,10 @@ void MainWindow::updateGanttChart()
             scene->addRect(time * BOX_SIZE, taskYPosition, BOX_SIZE, BOX_SIZE, boxPen, boxBrush);
             taskYPosition += TASK_SPACING;
         }
-    }
 
-    for (int time = 0; time < currentTime; time++) {
-        QGraphicsTextItem* timeText = scene->addText(QString::number(time));
+        QGraphicsTextItem *timeText = scene->addText(QString::number(history.getInstant()));
         timeText->setPos(time * BOX_SIZE, 0);
+        time++;
     }
 
     ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);

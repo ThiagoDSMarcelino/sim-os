@@ -1,5 +1,6 @@
 #include "simulator.h"
 
+#include <QColor>
 #include <QFile>
 #include <QMessageBox>
 #include "fcfs.h"
@@ -75,7 +76,12 @@ std::vector<QString> Simulator::load(const QString filePath)
             used_ids.push_back(id);
         }
 
-        QString color = values[1];
+        bool successfulParse;
+        int colorNum = values[1].toInt(&successfulParse);
+        if (!successfulParse) {
+            errors.push_back("Valores inteiros positivos são validos como cor");
+        }
+        QColor color(colorNum);
 
         int start_time = values[2].toInt();
         if (start_time < 0)
@@ -89,7 +95,6 @@ std::vector<QString> Simulator::load(const QString filePath)
             errors.push_back("Valores inteiros positivos são validos como tempo de duração");
         }
 
-        bool successfulParse;
         int priority = values[4].toInt(&successfulParse);
         if (!successfulParse) {
             errors.push_back("Valores inteiros positivos são validos como prioridade");
@@ -140,8 +145,6 @@ void Simulator::start()
 
 void Simulator::runQuantum()
 {
-    qDebug() << "prev task exist: " << (this->running_task != nullptr);
-
     if (this->running_task != nullptr) {
         this->scheduler->addTask(this->running_task);
     }
@@ -160,14 +163,9 @@ void Simulator::runQuantum()
     }
 
     this->running_task = this->scheduler->getNextTask();
-
-    if (this->running_task != nullptr) {
-        qDebug() << "running task: " << this->running_task->get_id();
-    } else {
-        qDebug() << "no task running";
-    }
-
     this->time += this->quantum;
+
+    this->history.push_back(HistoryData(time, this->tasks[1], {this->tasks[0], this->tasks[1]}));
 }
 
 const std::vector<TaskControlBlock *> Simulator::getTasks()
@@ -183,4 +181,9 @@ TaskControlBlock *Simulator::getRunningTask()
 int Simulator::getTime()
 {
     return this->time;
+}
+
+std::vector<HistoryData> Simulator::getHistory()
+{
+    return this->history;
 }

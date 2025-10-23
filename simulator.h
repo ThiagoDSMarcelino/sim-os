@@ -2,9 +2,10 @@
 #define SIMULATOR_H
 
 #include <QString>
-#include <vector>
+#include "historydata.h"
 #include "scheduler.h"
 #include "taskcontrolblock.h"
+#include <vector>
 
 #define MAX_PRIORITY 99
 #define MIN_PRIORITY 0
@@ -25,6 +26,8 @@ private:
 
     unsigned long long time;
 
+    std::vector<HistoryData> history;
+
 public:
     static std::vector<QString> load(const QString filePath);
     static void free();
@@ -34,6 +37,7 @@ public:
     const std::vector<TaskControlBlock *> getTasks();
     TaskControlBlock *getRunningTask();
     int getTime();
+    std::vector<HistoryData> getHistory();
 };
 
 #endif // SIMULATOR_H

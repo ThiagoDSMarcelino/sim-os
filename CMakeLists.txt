@@ -27,6 +27,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         taskcontrolblock.h taskcontrolblock.cpp
         scheduler.h scheduler.cpp
         fcfs.h fcfs.cpp
+        historydata.h historydata.cpp
 
 
 
