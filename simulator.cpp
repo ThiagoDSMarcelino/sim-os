@@ -2,12 +2,15 @@
 
 #include <QFile>
 #include <QMessageBox>
+#include "fcfs.h"
+#include <algorithm>
 
 Simulator *Simulator::instance = nullptr;
 
 Simulator::Simulator(Scheduler* scheduler, int quantum, std::vector<TaskControlBlock*> tasks)
 {
-    this->loaded_tasks = tasks;
+    this->running_task = nullptr;
+    this->tasks = tasks;
     this->scheduler = scheduler;
     this->quantum = quantum;
     this->instance = this;
@@ -107,7 +110,9 @@ std::vector<QString> Simulator::load(const QString filePath)
         return errors;
     }
 
-    Simulator::instance = new Simulator(nullptr, quantum, tcb_list);
+    auto scheduler = new FCFS();
+
+    Simulator::instance = new Simulator(scheduler, quantum, tcb_list);
 
     return errors;
 }
@@ -135,16 +140,31 @@ void Simulator::start()
 
 void Simulator::runQuantum()
 {
-    auto it = this->loaded_tasks.begin();
+    qDebug() << "prev task exist: " << (this->running_task != nullptr);
 
-    while (it != this->loaded_tasks.end()) {
-        if ((*it)->get_start_time() <= this->time) {
-            this->scheduler->addTask((*it));
+    if (this->running_task != nullptr) {
+        this->scheduler->addTask(this->running_task);
+    }
 
-            this->loaded_tasks.erase(it);
-            it--;
+    // TODO: probabily exist a better way to do this
+    for (int i = 0; i < this->tasks.size(); i++) {
+        if (std::find(this->loaded_tasks.begin(), this->loaded_tasks.end(), i)
+            != this->loaded_tasks.end()) {
+            continue;
         }
-        it++;
+
+        if (tasks[i]->get_start_time() <= this->time) {
+            this->scheduler->addTask(tasks[i]);
+            this->loaded_tasks.push_back(i);
+        }
+    }
+
+    this->running_task = this->scheduler->getNextTask();
+
+    if (this->running_task != nullptr) {
+        qDebug() << "running task: " << this->running_task->get_id();
+    } else {
+        qDebug() << "no task running";
     }
 
     this->time += this->quantum;
@@ -152,10 +172,15 @@ void Simulator::runQuantum()
 
 const std::vector<TaskControlBlock *> Simulator::getTasks()
 {
-    return this->loaded_tasks;
+    return this->tasks;
 }
 
 TaskControlBlock *Simulator::getRunningTask()
 {
     return this->running_task;
+}
+
+int Simulator::getTime()
+{
+    return this->time;
 }

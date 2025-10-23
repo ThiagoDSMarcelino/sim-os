@@ -19,7 +19,8 @@ private:
 
     Scheduler *scheduler;
     int quantum;
-    std::vector<TaskControlBlock *> loaded_tasks;
+    std::vector<TaskControlBlock *> tasks;
+    std::vector<size_t> loaded_tasks;
     TaskControlBlock *running_task;
 
     unsigned long long time;
@@ -32,6 +33,7 @@ public:
     void runQuantum();
     const std::vector<TaskControlBlock *> getTasks();
     TaskControlBlock *getRunningTask();
+    int getTime();
 };
 
 #endif // SIMULATOR_H
