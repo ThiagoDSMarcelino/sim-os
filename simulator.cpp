@@ -21,6 +21,16 @@ Simulator::~Simulator()
     delete this->scheduler;
 }
 
+Scheduler *getScheduler(QString schedulerName, std::vector<QString> *errors)
+{
+    if (schedulerName == "FCFS") {
+        return new FCFS();
+    }
+
+    errors->push_back("Nome de escalonador inválido");
+    return nullptr;
+}
+
 std::vector<QString> Simulator::load(const QString filePath)
 {
     std::vector<QString> errors;
@@ -47,7 +57,7 @@ std::vector<QString> Simulator::load(const QString filePath)
         return errors;
     }
 
-    // TODO: get scheduler
+    auto scheduler = getScheduler(values[0], &errors);
     int quantum = values[1].toInt();
 
     if (quantum < 1)
@@ -113,8 +123,6 @@ std::vector<QString> Simulator::load(const QString filePath)
     if (!errors.empty()) {
         return errors;
     }
-
-    auto scheduler = new FCFS();
 
     Simulator::instance = new Simulator(scheduler, quantum, tcb_list);
 
