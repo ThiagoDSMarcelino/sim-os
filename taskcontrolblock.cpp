@@ -1,4 +1,5 @@
 #include "taskcontrolblock.h"
+#include <QGuiApplication>
 
 TaskControlBlock::TaskControlBlock(
     QString id, QColor color, int start_time, int duration, int priority)
@@ -8,6 +9,7 @@ TaskControlBlock::TaskControlBlock(
     this->start_time = start_time;
     this->duration = duration;
     this->priority = priority;
+    this->elepsedTime = 0;
 }
 
 QString const TaskControlBlock::get_id()
@@ -30,7 +32,17 @@ int const TaskControlBlock::get_start_time()
     return this->start_time;
 }
 
-int const TaskControlBlock::get_duration()
+void TaskControlBlock::run()
 {
-    return this->duration;
+    if (this->hasFinish()) {
+        qDebug() << "tarefa já foi finalizada";
+        return;
+    }
+
+    this->elepsedTime++;
+}
+
+bool TaskControlBlock::hasFinish()
+{
+    return this->duration == this->elepsedTime;
 }

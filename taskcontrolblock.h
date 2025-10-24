@@ -12,7 +12,8 @@ public:
     int const get_priority();
     QColor const get_color();
     int const get_start_time();
-    int const get_duration();
+    void run();
+    bool hasFinish();
 
 private:
     QString id;
@@ -20,6 +21,7 @@ private:
     int start_time;
     int duration;
     int priority;
+    int elepsedTime;
 };
 
 #endif // TASKCONTROLBLOCK_H

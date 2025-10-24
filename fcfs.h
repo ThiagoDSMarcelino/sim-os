@@ -14,6 +14,7 @@ public:
     void addTask(TaskControlBlock *task) override;
     void sleepTask(QString id) override;
     void wakeTask(QString id) override;
+    std::vector<TaskControlBlock *> getTasks() override;
 
 private:
     std::vector<TaskControlBlock *> ready_queue;

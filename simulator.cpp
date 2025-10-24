@@ -10,7 +10,6 @@ Simulator *Simulator::instance = nullptr;
 
 Simulator::Simulator(Scheduler* scheduler, int quantum, std::vector<TaskControlBlock*> tasks)
 {
-    this->running_task = nullptr;
     this->tasks = tasks;
     this->scheduler = scheduler;
     this->quantum = quantum;
@@ -145,37 +144,56 @@ void Simulator::start()
 
 void Simulator::runQuantum()
 {
-    if (this->running_task != nullptr) {
-        this->scheduler->addTask(this->running_task);
-    }
+    auto running_task = this->scheduler->getNextTask();
 
-    // TODO: probabily exist a better way to do this
-    for (int i = 0; i < this->tasks.size(); i++) {
-        if (std::find(this->loaded_tasks.begin(), this->loaded_tasks.end(), i)
-            != this->loaded_tasks.end()) {
-            continue;
+    for (int count = this->quantum; count > 0; count--) {
+        bool newTaskSyscall = false;
+
+        // TODO: probabily exist a better way to do this
+        for (int i = 0; i < this->tasks.size(); i++) {
+            if (std::find(this->loaded_tasks.begin(), this->loaded_tasks.end(), i)
+                != this->loaded_tasks.end()) {
+                continue;
+            }
+
+            if (tasks.at(i)->get_start_time() <= this->time) {
+                this->scheduler->addTask(tasks[i]);
+                this->loaded_tasks.push_back(i);
+                newTaskSyscall = true;
+            }
         }
 
-        if (tasks[i]->get_start_time() <= this->time) {
-            this->scheduler->addTask(tasks[i]);
-            this->loaded_tasks.push_back(i);
+        if (newTaskSyscall) {
+            break;
+        }
+
+        this->time++;
+        std::vector<TaskControlBlock *> activeTasks;
+
+        if (running_task != nullptr) {
+            running_task->run();
+            activeTasks.push_back(running_task);
+        }
+
+        for (auto task : this->scheduler->getTasks()) {
+            activeTasks.push_back(task);
+        }
+
+        this->history.push_back(HistoryData(this->time, running_task, activeTasks));
+
+        if (running_task != nullptr && running_task->hasFinish()) {
+            break;
         }
     }
 
-    this->running_task = this->scheduler->getNextTask();
-    this->time += this->quantum;
-
-    this->history.push_back(HistoryData(time, this->tasks[1], {this->tasks[0], this->tasks[1]}));
+    if (running_task != nullptr && !running_task->hasFinish()) {
+        this->scheduler->addTask(running_task);
+    }
 }
 
 const std::vector<TaskControlBlock *> Simulator::getTasks()
 {
     return this->tasks;
-}
-
-TaskControlBlock *Simulator::getRunningTask()
-{
-    return this->running_task;
 }
 
 int Simulator::getTime()
@@ -186,4 +204,19 @@ int Simulator::getTime()
 std::vector<HistoryData> Simulator::getHistory()
 {
     return this->history;
+}
+
+bool const Simulator::hasFinished()
+{
+    if (this->tasks.size() != this->loaded_tasks.size()) {
+        return false;
+    }
+
+    for (auto task : this->tasks) {
+        if (!task->hasFinish()) {
+            return false;
+        }
+    }
+
+    return true;
 }

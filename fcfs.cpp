@@ -51,3 +51,8 @@ void FCFS::wakeTask(QString id)
     this->addTask(*it);
     this->ready_queue.erase(it);
 }
+
+std::vector<TaskControlBlock *> FCFS::getTasks()
+{
+    return this->ready_queue;
+}

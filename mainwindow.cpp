@@ -85,6 +85,10 @@ void MainWindow::on_nextQuantumButton_clicked()
     this->simulator->runQuantum();
 
     updateGanttChart();
+
+    if (this->simulator->hasFinished()) {
+        ui->nextQuantumButton->setDisabled(true);
+    }
 }
 
 void MainWindow::updateGanttChart()
@@ -97,7 +101,6 @@ void MainWindow::updateGanttChart()
     const int BOX_SIZE = 30;
     const int TASK_SPACING = 40;
     const int TIME_HEADER = 20;
-    const QColor RUNNING_COLOR = Qt::cyan;
 
     auto tasks = this->simulator->getTasks();
     auto history = this->simulator->getHistory();
@@ -126,11 +129,8 @@ void MainWindow::updateGanttChart()
             auto it = std::find_if(activeTasks.begin(),
                                    activeTasks.end(),
                                    [currentId](TaskControlBlock *task) {
-                                       qDebug() << task->get_id() << " - " << currentId;
                                        return task->get_id() == currentId;
                                    });
-            qDebug() << "achou: " << (it != activeTasks.end());
-            qDebug();
 
             if (it == activeTasks.end()) {
                 taskYPosition += TASK_SPACING;
