@@ -25,6 +25,8 @@ private slots:
 
     void on_nextQuantumButton_clicked();
 
+    void on_fullSimulationButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
