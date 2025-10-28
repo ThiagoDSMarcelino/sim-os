@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QGraphicsTextItem>
 #include <QGuiApplication>
+#include <QMessageBox>
 #include <QScreen>
 #include "algorithm"
 
@@ -113,7 +114,7 @@ void MainWindow::updateGanttChart()
 {
     if (!this->simulator) return;
 
-    QGraphicsScene* scene = ui->graphicsView->scene();
+    QGraphicsScene *scene = this->ui->graphicsView->scene();
     scene->clear();
 
     const int BOX_SIZE = 30;
@@ -176,4 +177,25 @@ void MainWindow::updateGanttChart()
     }
 
     ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+}
+
+void MainWindow::on_saveButton_clicked()
+{
+    QString filePath
+        = QFileDialog::getSaveFileName(this,
+                                       tr("Salvar Gráfico como Imagem"),
+                                       QDir::homePath(),
+                                       tr("Imagens PNG (*.png);;Imagens JPEG (*.jpg *.jpeg)"));
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    QPixmap pixmap = this->ui->graphicsView->grab();
+
+    if (!pixmap.save(filePath)) {
+        QMessageBox::warning(this,
+                             tr("Erro ao Salvar"),
+                             tr("Não foi possível salvar a imagem no local especificado."));
+    }
 }
