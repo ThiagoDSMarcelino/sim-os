@@ -27,6 +27,8 @@ private slots:
 
     void on_fullSimulationButton_clicked();
 
+    void on_saveButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
