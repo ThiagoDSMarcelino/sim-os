@@ -33,9 +33,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="fullSimulationButton">
+          <property name="text">
+           <string>Simular</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="startSimulationButton">
           <property name="text">
-           <string>Iniciar simulação</string>
+           <string>Debugger</string>
           </property>
          </widget>
         </item>
@@ -53,6 +60,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="saveButton">
+          <property name="text">
+           <string>Salvar gráfico</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -65,7 +79,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

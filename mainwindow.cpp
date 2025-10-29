@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QGraphicsTextItem>
 #include <QGuiApplication>
+#include <QMessageBox>
 #include <QScreen>
 #include "algorithm"
 
@@ -16,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->stackedWidget->setCurrentIndex(0);
 
     ui->startSimulationButton->setDisabled(true);
+    ui->fullSimulationButton->setDisabled(true);
 
     ui->graphicsView->setScene(new QGraphicsScene(this));
 
@@ -38,12 +40,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_selectFileButton_clicked()
 {
-    QString filePath = QFileDialog::getOpenFileName(
-        this,
-        tr("Abrir Arquivo"),
-        QDir::homePath(),
-        tr("*.txt")
-        );
+    QString filePath = QFileDialog::getOpenFileName(this,
+                                                    tr("Abrir Arquivo"),
+                                                    QDir::homePath(),
+                                                    tr("*.txt"));
 
     ui->messagesList->clear();
 
@@ -57,6 +57,7 @@ void MainWindow::on_selectFileButton_clicked()
     if (errors.empty()) {
         ui->messagesList->addItem("Configuração carregada com sucesso!");
         ui->startSimulationButton->setDisabled(false);
+        ui->fullSimulationButton->setDisabled(false);
         this->simulator = Simulator::getInstance();
         return;
     }
@@ -68,7 +69,9 @@ void MainWindow::on_selectFileButton_clicked()
 
 void MainWindow::on_startSimulationButton_clicked()
 {
-    if (!this->simulator) return;
+    if (!this->simulator) {
+        return;
+    }
 
     ui->stackedWidget->setCurrentIndex(1);
 
@@ -77,10 +80,11 @@ void MainWindow::on_startSimulationButton_clicked()
     updateGanttChart();
 }
 
-
 void MainWindow::on_nextQuantumButton_clicked()
 {
-    if (!this->simulator) return;
+    if (!this->simulator || this->simulator->hasFinished()) {
+        return;
+    }
 
     this->simulator->runQuantum();
 
@@ -91,11 +95,28 @@ void MainWindow::on_nextQuantumButton_clicked()
     }
 }
 
+void MainWindow::on_fullSimulationButton_clicked()
+{
+    if (!this->simulator) {
+        return;
+    }
+
+    ui->stackedWidget->setCurrentIndex(1);
+
+    this->simulator->start();
+
+    while (!this->simulator->hasFinished()) {
+        this->simulator->runQuantum();
+    }
+
+    updateGanttChart();
+}
+
 void MainWindow::updateGanttChart()
 {
     if (!this->simulator) return;
 
-    QGraphicsScene* scene = ui->graphicsView->scene();
+    QGraphicsScene *scene = this->ui->graphicsView->scene();
     scene->clear();
 
     const int BOX_SIZE = 30;
@@ -158,4 +179,25 @@ void MainWindow::updateGanttChart()
     }
 
     ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+}
+
+void MainWindow::on_saveButton_clicked()
+{
+    QString filePath
+        = QFileDialog::getSaveFileName(this,
+                                       tr("Salvar Gráfico como Imagem"),
+                                       QDir::homePath(),
+                                       tr("Imagens PNG (*.png);;Imagens JPEG (*.jpg *.jpeg)"));
+
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    QPixmap pixmap = this->ui->graphicsView->grab();
+
+    if (!pixmap.save(filePath)) {
+        QMessageBox::warning(this,
+                             tr("Erro ao Salvar"),
+                             tr("Não foi possível salvar a imagem no local especificado."));
+    }
 }
