@@ -14,6 +14,7 @@ public:
     int const get_start_time();
     void run();
     bool hasFinish();
+    int const getRemainingTime();
 
 private:
     QString id;

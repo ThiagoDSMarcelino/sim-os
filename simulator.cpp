@@ -4,6 +4,8 @@
 #include <QFile>
 #include <QMessageBox>
 #include "fcfs.h"
+#include "srtf.h"
+#include "priop.h"
 #include <algorithm>
 
 Simulator *Simulator::instance = nullptr;
@@ -25,6 +27,12 @@ Scheduler *getScheduler(QString schedulerName, std::vector<QString> *errors)
 {
     if (schedulerName == "FCFS") {
         return new FCFS();
+    }
+    if (schedulerName == "SRTF") {
+        return new SRTF();
+    }
+    if (schedulerName == "PRIOP") {
+        return new PRIOP();
     }
 
     errors->push_back("Nome de escalonador inválido");

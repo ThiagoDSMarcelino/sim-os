@@ -29,6 +29,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         fcfs.h fcfs.cpp
         historydata.h historydata.cpp
 
+        srtf.h srtf.cpp
+        priop.h priop.cpp
+
 
 
     )

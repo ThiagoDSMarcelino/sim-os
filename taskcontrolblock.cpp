@@ -46,3 +46,8 @@ bool TaskControlBlock::hasFinish()
 {
     return this->duration == this->elepsedTime;
 }
+
+int const TaskControlBlock::getRemainingTime()
+{
+    return this->duration - this->elepsedTime;
+}
