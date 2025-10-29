@@ -25,7 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         simulator.h simulator.cpp
         taskcontrolblock.h taskcontrolblock.cpp
-        scheduler.h scheduler.cpp
+        scheduler.h
         fcfs.h fcfs.cpp
         historydata.h historydata.cpp
 

@@ -70,6 +70,10 @@ std::vector<QString> Simulator::load(const QString filePath)
 
     if (quantum < 1)
     {
+        if (scheduler != nullptr) {
+            delete scheduler;
+        }
+
         errors.push_back("Somente números inteiros positivos são validos como quantum");
         return errors;
     }
@@ -129,6 +133,10 @@ std::vector<QString> Simulator::load(const QString filePath)
     file.close();
 
     if (!errors.empty()) {
+        if (scheduler != nullptr) {
+            delete scheduler;
+        }
+
         return errors;
     }
 
