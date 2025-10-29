@@ -82,7 +82,7 @@ void MainWindow::on_startSimulationButton_clicked()
 
 void MainWindow::on_nextQuantumButton_clicked()
 {
-    if (!this->simulator) {
+    if (!this->simulator || this->simulator->hasFinished()) {
         return;
     }
 
@@ -108,6 +108,8 @@ void MainWindow::on_fullSimulationButton_clicked()
     while (!this->simulator->hasFinished()) {
         this->simulator->runQuantum();
     }
+
+    updateGanttChart();
 }
 
 void MainWindow::updateGanttChart()
