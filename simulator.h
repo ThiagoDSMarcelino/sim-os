@@ -13,7 +13,7 @@
 class Simulator
 {
 private:
-    Simulator(Scheduler* scheduler, int quantum, std::vector<TaskControlBlock*> tasks);
+    Simulator(Scheduler *scheduler, int quantum, std::vector<TaskControlBlock *> tasks);
     ~Simulator();
 
     static Simulator *instance;
@@ -22,15 +22,19 @@ private:
     int quantum;
     std::vector<TaskControlBlock *> tasks;
     std::vector<size_t> loaded_tasks;
+    std::vector<TaskControlBlock *> active_tasks;
 
     unsigned long long time;
 
     std::vector<HistoryData> history;
+    TaskControlBlock *getRunningTask();
+
+    bool loadTasks();
 
 public:
     static std::vector<QString> load(const QString filePath);
     static void free();
-    static Simulator* getInstance();
+    static Simulator *getInstance();
     void start();
     void runQuantum();
     const std::vector<TaskControlBlock *> getTasks();

@@ -4,13 +4,13 @@
 #include <QFile>
 #include <QMessageBox>
 #include "fcfs.h"
-#include "srtf.h"
 #include "priop.h"
+#include "srtf.h"
 #include <algorithm>
 
 Simulator *Simulator::instance = nullptr;
 
-Simulator::Simulator(Scheduler* scheduler, int quantum, std::vector<TaskControlBlock*> tasks)
+Simulator::Simulator(Scheduler *scheduler, int quantum, std::vector<TaskControlBlock *> tasks)
 {
     this->tasks = tasks;
     this->scheduler = scheduler;
@@ -25,13 +25,16 @@ Simulator::~Simulator()
 
 Scheduler *getScheduler(QString schedulerName, std::vector<QString> *errors)
 {
-    if (schedulerName == "FCFS") {
+    if (schedulerName == "FCFS")
+    {
         return new FCFS();
     }
-    if (schedulerName == "SRTF") {
+    if (schedulerName == "SRTF")
+    {
         return new SRTF();
     }
-    if (schedulerName == "PRIOP") {
+    if (schedulerName == "PRIOP")
+    {
         return new PRIOP();
     }
 
@@ -44,7 +47,8 @@ std::vector<QString> Simulator::load(const QString filePath)
     std::vector<QString> errors;
     QFile file(filePath);
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
         errors.push_back("Não foi possível abrir o arquivo selecionado.");
         return errors;
     }
@@ -53,14 +57,16 @@ std::vector<QString> Simulator::load(const QString filePath)
 
     QString line = in.readLine();
 
-    if (line.isEmpty()) {
+    if (line.isEmpty())
+    {
         errors.push_back("Arquivo de configuração está vazio");
         return errors;
     }
 
     QStringList values = line.split(";");
 
-    if (values.length() != 2) {
+    if (values.length() != 2)
+    {
         errors.push_back("Formação da sistema está incorreta");
         return errors;
     }
@@ -70,7 +76,8 @@ std::vector<QString> Simulator::load(const QString filePath)
 
     if (quantum < 1)
     {
-        if (scheduler != nullptr) {
+        if (scheduler != nullptr)
+        {
             delete scheduler;
         }
 
@@ -80,7 +87,8 @@ std::vector<QString> Simulator::load(const QString filePath)
 
     std::vector<QString> used_ids;
     std::vector<TaskControlBlock *> tcb_list;
-    while (!in.atEnd()) {
+    while (!in.atEnd())
+    {
         line = in.readLine();
         values = line.split(";");
 
@@ -91,15 +99,19 @@ std::vector<QString> Simulator::load(const QString filePath)
         }
 
         QString id = values[0];
-        if (std::find(used_ids.begin(), used_ids.end(), id) != used_ids.end()) {
+        if (std::find(used_ids.begin(), used_ids.end(), id) != used_ids.end())
+        {
             errors.push_back("ID duplicado");
-        } else {
+        }
+        else
+        {
             used_ids.push_back(id);
         }
 
         bool successfulParse;
         int colorNum = values[1].toInt(&successfulParse);
-        if (!successfulParse) {
+        if (!successfulParse)
+        {
             errors.push_back("Valores inteiros positivos são validos como cor");
         }
         QColor color(colorNum);
@@ -117,10 +129,12 @@ std::vector<QString> Simulator::load(const QString filePath)
         }
 
         int priority = values[4].toInt(&successfulParse);
-        if (!successfulParse) {
+        if (!successfulParse)
+        {
             errors.push_back("Valores inteiros positivos são validos como prioridade");
         }
-        else if (priority < MIN_PRIORITY || priority > MAX_PRIORITY) {
+        else if (priority < MIN_PRIORITY || priority > MAX_PRIORITY)
+        {
             errors.push_back("A prioridade deve ser um valor entre 0 e 99");
         }
 
@@ -132,8 +146,10 @@ std::vector<QString> Simulator::load(const QString filePath)
 
     file.close();
 
-    if (!errors.empty()) {
-        if (scheduler != nullptr) {
+    if (!errors.empty())
+    {
+        if (scheduler != nullptr)
+        {
             delete scheduler;
         }
 
@@ -147,14 +163,15 @@ std::vector<QString> Simulator::load(const QString filePath)
 
 void Simulator::free()
 {
-    if (instance == NULL) {
+    if (instance == NULL)
+    {
         return;
     }
 
     delete instance;
 }
 
-Simulator* Simulator::getInstance()
+Simulator *Simulator::getInstance()
 {
     Q_ASSERT_X(instance != nullptr, "Simulator::getInstance()", "A instância do simulador não foi criada. Chame Simulator::load() primeiro.");
     return instance;
@@ -166,52 +183,86 @@ void Simulator::start()
     this->runQuantum();
 }
 
+TaskControlBlock *Simulator::getRunningTask()
+{
+    if (this->active_tasks.size() == 0) {
+        return nullptr;
+    }
+
+    size_t nextTaskIndex = this->scheduler->getNextTask(this->active_tasks);
+
+    auto nextTask = this->active_tasks.at(nextTaskIndex);
+
+    this->active_tasks.erase(this->active_tasks.begin() + nextTaskIndex);
+
+    return nextTask;
+}
+
+bool Simulator::loadTasks()
+{
+    bool anyTaskLoaded = false;
+
+    for (int i = 0; i < this->tasks.size(); i++)
+    {
+        auto taskId = this->tasks.at(i)->get_id();
+        auto it = std::find(this->loaded_tasks.begin(), this->loaded_tasks.end(), i);
+
+        if (it != this->loaded_tasks.end()) {
+            continue;
+        }
+
+        if (tasks.at(i)->get_start_time() <= this->time)
+        {
+            this->loaded_tasks.push_back(i);
+            this->active_tasks.push_back(tasks[i]);
+            anyTaskLoaded = true;
+        }
+    }
+
+    return anyTaskLoaded;
+}
+
 void Simulator::runQuantum()
 {
-    auto running_task = this->scheduler->getNextTask();
+    this->loadTasks();
 
-    for (int count = this->quantum; count > 0; count--) {
-        bool newTaskSyscall = false;
+    TaskControlBlock *running_task = this->getRunningTask();
 
-        // TODO: probabily exist a better way to do this
-        for (int i = 0; i < this->tasks.size(); i++) {
-            if (std::find(this->loaded_tasks.begin(), this->loaded_tasks.end(), i)
-                != this->loaded_tasks.end()) {
-                continue;
-            }
+    for (int count = this->quantum; count > 0; count--)
+    {
+        if (count < this->quantum) {
+            bool hasNewTaskSysCall = this->loadTasks();
 
-            if (tasks.at(i)->get_start_time() <= this->time) {
-                this->scheduler->addTask(tasks[i]);
-                this->loaded_tasks.push_back(i);
-                newTaskSyscall = true;
+            if (hasNewTaskSysCall) {
+                break;
             }
         }
 
-        if (newTaskSyscall) {
-            break;
-        }
-
-        this->time++;
         std::vector<TaskControlBlock *> activeTasks;
 
-        if (running_task != nullptr) {
+        if (running_task != nullptr)
+        {
             running_task->run();
             activeTasks.push_back(running_task);
         }
 
-        for (auto task : this->scheduler->getTasks()) {
+        for (auto task : this->active_tasks) {
             activeTasks.push_back(task);
         }
 
         this->history.push_back(HistoryData(this->time, running_task, activeTasks));
 
-        if (running_task != nullptr && running_task->hasFinish()) {
+        this->time++;
+
+        if (running_task != nullptr && running_task->hasFinish())
+        {
             break;
         }
     }
 
-    if (running_task != nullptr && !running_task->hasFinish()) {
-        this->scheduler->addTask(running_task);
+    if (running_task != nullptr && !running_task->hasFinish())
+    {
+        this->active_tasks.push_back(running_task);
     }
 }
 
@@ -232,12 +283,15 @@ std::vector<HistoryData> Simulator::getHistory()
 
 bool const Simulator::hasFinished()
 {
-    if (this->tasks.size() != this->loaded_tasks.size()) {
+    if (this->tasks.size() != this->loaded_tasks.size())
+    {
         return false;
     }
 
-    for (auto task : this->tasks) {
-        if (!task->hasFinish()) {
+    for (auto task : this->tasks)
+    {
+        if (!task->hasFinish())
+        {
             return false;
         }
     }
