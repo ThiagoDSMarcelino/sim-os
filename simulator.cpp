@@ -108,13 +108,11 @@ std::vector<QString> Simulator::load(const QString filePath)
             used_ids.push_back(id);
         }
 
-        bool successfulParse;
-        int colorNum = values[1].toInt(&successfulParse);
-        if (!successfulParse)
-        {
-            errors.push_back("Valores inteiros positivos são validos como cor");
+        QString colorString = values[1];
+        QColor color(colorString);
+        if (!color.isValid()) {
+            errors.push_back("Código de cor inválido (use formato Hex #RRGGBB)");
         }
-        QColor color(colorNum);
 
         int start_time = values[2].toInt();
         if (start_time < 0)
@@ -128,6 +126,7 @@ std::vector<QString> Simulator::load(const QString filePath)
             errors.push_back("Valores inteiros positivos são validos como tempo de duração");
         }
 
+        bool successfulParse;
         int priority = values[4].toInt(&successfulParse);
         if (!successfulParse)
         {
@@ -202,9 +201,7 @@ bool Simulator::loadTasks()
 {
     bool anyTaskLoaded = false;
 
-    for (int i = 0; i < this->tasks.size(); i++)
-    {
-        auto taskId = this->tasks.at(i)->get_id();
+    for (int i = 0; i < this->tasks.size(); i++) {
         auto it = std::find(this->loaded_tasks.begin(), this->loaded_tasks.end(), i);
 
         if (it != this->loaded_tasks.end()) {

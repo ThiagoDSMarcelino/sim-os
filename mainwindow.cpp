@@ -62,7 +62,7 @@ void MainWindow::on_selectFileButton_clicked()
         return;
     }
 
-    for (auto error : errors) {
+    for (const QString &error : errors) {
         ui->messagesList->addItem(error);
     }
 }
