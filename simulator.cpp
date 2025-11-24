@@ -26,7 +26,7 @@ Simulator::~Simulator()
 
 Scheduler *getScheduler(QString schedulerName, int alpha, std::vector<QString> *errors)
 {
-    if (schedulerName == "RoundRobin")
+    if (schedulerName == "RR")
     {
         return new RoundRobin();
     }
@@ -79,7 +79,7 @@ std::vector<QString> Simulator::load(const QString filePath)
         return errors;
     }
 
-    int alpha = 0;
+    int alpha = 1;
     if (values.length() == 3)
     {
         alpha = values[1].toInt();
