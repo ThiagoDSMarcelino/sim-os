@@ -4,6 +4,9 @@
 #include <QColor>
 #include <QString>
 
+#define MAX_PRIORITY 99
+#define MIN_PRIORITY 0
+
 class TaskControlBlock
 {
 public:

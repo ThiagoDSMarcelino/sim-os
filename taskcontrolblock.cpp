@@ -36,7 +36,7 @@ int const TaskControlBlock::getStartTime()
 void TaskControlBlock::run()
 {
     if (this->hasFinish()) {
-        qDebug() << "tarefa já foi finalizada";
+        qDebug() << "task already finished";
         return;
     }
 
@@ -60,7 +60,15 @@ int const TaskControlBlock::getDynamicPriority()
 
 void TaskControlBlock::incresseDynamicPriority(int alpha)
 {
+    if (alpha < 1) {
+        qDebug() << "invalid value for alpha";
+    }
+
     this->dynamicPriority += alpha;
+
+    if (this->dynamicPriority > MAX_PRIORITY) {
+        this->dynamicPriority = MAX_PRIORITY;
+    }
 }
 
 void TaskControlBlock::resetDynamicPriority()

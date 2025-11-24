@@ -7,9 +7,6 @@
 #include "taskcontrolblock.h"
 #include <vector>
 
-#define MAX_PRIORITY 99
-#define MIN_PRIORITY 0
-
 class Simulator
 {
 private:
