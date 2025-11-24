@@ -10,7 +10,7 @@ size_t PRIOe::getNextTask(std::vector<TaskControlBlock *> tasks)
     auto it_max = std::max_element(tasks.begin(),
                                    tasks.end(),
                                    [](TaskControlBlock *a, TaskControlBlock *b) {
-                                       return a->getPriority() < b->getPriority();
+                                       return a->getDynamicPriority() < b->getDynamicPriority();
                                    });
 
     size_t nextTaskIndex = std::distance(tasks.begin(), it_max);
