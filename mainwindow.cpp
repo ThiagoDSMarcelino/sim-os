@@ -130,7 +130,7 @@ void MainWindow::updateGanttChart()
 
     // Set tasks ids at the left of the graph
     for (int i = tasks.size() - 1; i >= 0; i--) {
-        QGraphicsTextItem* taskName = scene->addText(tasks.at(i)->get_id());
+        QGraphicsTextItem *taskName = scene->addText(tasks.at(i)->getId());
         taskName->setPos(-50, taskYPosition + 5);
         taskYPosition += TASK_SPACING;
     }
@@ -145,12 +145,12 @@ void MainWindow::updateGanttChart()
             QPen boxPen(Qt::gray);
             QBrush boxBrush;
 
-            auto currentId = tasks.at(i)->get_id();
+            auto currentId = tasks.at(i)->getId();
             auto activeTasks = history.getActiveTasks();
             auto it = std::find_if(activeTasks.begin(),
                                    activeTasks.end(),
                                    [currentId](TaskControlBlock *task) {
-                                       return task->get_id() == currentId;
+                                       return task->getId() == currentId;
                                    });
 
             if (it == activeTasks.end()) {
@@ -158,12 +158,12 @@ void MainWindow::updateGanttChart()
                 continue;
             }
 
-            QString runningTaskID = history.getRunningTask() ? history.getRunningTask()->get_id()
+            QString runningTaskID = history.getRunningTask() ? history.getRunningTask()->getId()
                                                              : "";
 
-            if (tasks.at(i)->get_id() == runningTaskID) {
+            if (tasks.at(i)->getId() == runningTaskID) {
                 boxPen.setColor(Qt::black);
-                boxBrush.setColor(tasks.at(i)->get_color());
+                boxBrush.setColor(tasks.at(i)->getColor());
                 boxBrush.setStyle(Qt::SolidPattern);
             } else {
                 boxBrush.setStyle(Qt::NoBrush);

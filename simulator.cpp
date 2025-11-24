@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include "prio.h"
+#include "prioe.h"
 #include "roundrobin.h"
 #include "srtf.h"
 #include <algorithm>
@@ -25,20 +26,24 @@ Simulator::~Simulator()
 
 Scheduler *getScheduler(QString schedulerName, int alpha, std::vector<QString> *errors)
 {
-    if (schedulerName == "RoundRobin") {
+    if (schedulerName == "RoundRobin")
+    {
         return new RoundRobin();
     }
 
-    if (schedulerName == "SRTF") {
+    if (schedulerName == "SRTF")
+    {
         return new SRTF();
     }
 
-    if (schedulerName == "PRIO") {
+    if (schedulerName == "PRIO")
+    {
         return new PRIO();
     }
 
-    if (schedulerName == "PROPe") {
-        return new PRIO();
+    if (schedulerName == "PROPe")
+    {
+        return new PRIOe(alpha);
     }
 
     errors->push_back("Nome de escalonador inválido");
@@ -68,24 +73,30 @@ std::vector<QString> Simulator::load(const QString filePath)
 
     QStringList values = line.split(";");
 
-    if (values.length() != 2)
+    if (values.length() < 2 || values.length() > 3)
     {
         errors.push_back("Formação da sistema está incorreta");
         return errors;
     }
 
-    auto scheduler = getScheduler(values[0], 0, &errors);
-    int quantum = values[1].toInt();
+    int alpha = 0;
+    if (values.length() == 3)
+    {
+        alpha = values[1].toInt();
+        if (alpha < 1)
+        {
+            errors.push_back(
+                "Somente números inteiros positivos diferentes zero são validos como alpha");
+        }
+    }
 
+    auto scheduler = getScheduler(values[0], alpha, &errors);
+
+    int quantum = values[1].toInt();
     if (quantum < 1)
     {
-        if (scheduler != nullptr)
-        {
-            delete scheduler;
-        }
-
-        errors.push_back("Somente números inteiros positivos são validos como quantum");
-        return errors;
+        errors.push_back(
+            "Somente números inteiros positivos diferentes zero são validos como quantum");
     }
 
     std::vector<QString> used_ids;
@@ -113,7 +124,8 @@ std::vector<QString> Simulator::load(const QString filePath)
 
         QString colorString = values[1];
         QColor color(colorString);
-        if (!color.isValid()) {
+        if (!color.isValid())
+        {
             errors.push_back("Código de cor inválido (use formato Hex #RRGGBB)");
         }
 
@@ -187,7 +199,8 @@ void Simulator::start()
 
 TaskControlBlock *Simulator::getRunningTask()
 {
-    if (this->active_tasks.size() == 0) {
+    if (this->active_tasks.size() == 0)
+    {
         return nullptr;
     }
 
@@ -204,14 +217,16 @@ bool Simulator::loadTasks()
 {
     bool anyTaskLoaded = false;
 
-    for (int i = 0; i < this->tasks.size(); i++) {
+    for (int i = 0; i < this->tasks.size(); i++)
+    {
         auto it = std::find(this->loaded_tasks.begin(), this->loaded_tasks.end(), i);
 
-        if (it != this->loaded_tasks.end()) {
+        if (it != this->loaded_tasks.end())
+        {
             continue;
         }
 
-        if (tasks.at(i)->get_start_time() <= this->time)
+        if (tasks.at(i)->getStartTime() <= this->time)
         {
             this->loaded_tasks.push_back(i);
             this->active_tasks.push_back(tasks[i]);
@@ -230,10 +245,12 @@ void Simulator::runQuantum()
 
     for (int count = this->quantum; count > 0; count--)
     {
-        if (count < this->quantum) {
+        if (count < this->quantum)
+        {
             bool hasNewTaskSysCall = this->loadTasks();
 
-            if (hasNewTaskSysCall) {
+            if (hasNewTaskSysCall)
+            {
                 break;
             }
         }
@@ -246,7 +263,8 @@ void Simulator::runQuantum()
             activeTasks.push_back(running_task);
         }
 
-        for (auto task : this->active_tasks) {
+        for (auto task : this->active_tasks)
+        {
             activeTasks.push_back(task);
         }
 

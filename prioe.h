@@ -7,10 +7,13 @@
 class PRIOe : public Scheduler
 {
 public:
-    PRIOe();
+    PRIOe(int alpha);
     virtual ~PRIOe() override = default;
 
     size_t getNextTask(std::vector<TaskControlBlock *> tasks) override;
+
+private:
+    int alpha;
 };
 
 #endif // PRIOE_H

@@ -6,30 +6,31 @@ TaskControlBlock::TaskControlBlock(
 {
     this->id = id;
     this->color = color;
-    this->start_time = start_time;
+    this->startTime = start_time;
     this->duration = duration;
     this->priority = priority;
+    this->dynamicPriority = priority;
     this->elepsedTime = 0;
 }
 
-QString const TaskControlBlock::get_id()
+QString const TaskControlBlock::getId()
 {
     return this->id;
 }
 
-int const TaskControlBlock::get_priority()
+int const TaskControlBlock::getPriority()
 {
     return this->priority;
 }
 
-QColor const TaskControlBlock::get_color()
+QColor const TaskControlBlock::getColor()
 {
     return this->color;
 }
 
-int const TaskControlBlock::get_start_time()
+int const TaskControlBlock::getStartTime()
 {
-    return this->start_time;
+    return this->startTime;
 }
 
 void TaskControlBlock::run()
@@ -50,4 +51,19 @@ bool TaskControlBlock::hasFinish()
 int const TaskControlBlock::getRemainingTime()
 {
     return this->duration - this->elepsedTime;
+}
+
+int const TaskControlBlock::getDynamicPriority()
+{
+    return this->dynamicPriority;
+}
+
+void TaskControlBlock::incresseDynamicPriority(int alpha)
+{
+    this->dynamicPriority += alpha;
+}
+
+void TaskControlBlock::resetDynamicPriority()
+{
+    this->dynamicPriority = this->priority;
 }

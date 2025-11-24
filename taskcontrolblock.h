@@ -8,20 +8,24 @@ class TaskControlBlock
 {
 public:
     TaskControlBlock(QString id, QColor color, int start_time, int duration, int priority);
-    QString const get_id();
-    int const get_priority();
-    QColor const get_color();
-    int const get_start_time();
+    QString const getId();
+    int const getPriority();
+    QColor const getColor();
+    int const getStartTime();
     void run();
     bool hasFinish();
     int const getRemainingTime();
+    int const getDynamicPriority();
+    void incresseDynamicPriority(int alpha);
+    void resetDynamicPriority();
 
 private:
     QString id;
     QColor color;
-    int start_time;
+    int startTime;
     int duration;
     int priority;
+    int dynamicPriority;
     int elepsedTime;
 };
 
