@@ -41,8 +41,7 @@ Scheduler *getScheduler(QString schedulerName, int alpha, std::vector<QString> *
         return new PRIO();
     }
 
-    if (schedulerName == "PROPe")
-    {
+    if (schedulerName == "PRIOe") {
         return new PRIOe(alpha);
     }
 
@@ -82,7 +81,7 @@ std::vector<QString> Simulator::load(const QString filePath)
     int alpha = 1;
     if (values.length() == 3)
     {
-        alpha = values[1].toInt();
+        alpha = values[2].toInt();
         if (alpha < 1)
         {
             errors.push_back(
