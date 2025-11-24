@@ -1,16 +1,16 @@
-#ifndef FCFS_H
-#define FCFS_H
+#ifndef PRIO_H
+#define PRIO_H
 
 #include "scheduler.h"
 #include <vector>
 
-class FCFS : public Scheduler
+class PRIO : public Scheduler
 {
 public:
-    FCFS();
-    virtual ~FCFS() override = default;
+    PRIO();
+    virtual ~PRIO() override = default;
 
     size_t getNextTask(std::vector<TaskControlBlock *> tasks) override;
 };
 
-#endif // FCFS_H
+#endif // PRIO_H

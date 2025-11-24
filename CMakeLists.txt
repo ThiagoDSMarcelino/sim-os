@@ -26,11 +26,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         simulator.h simulator.cpp
         taskcontrolblock.h taskcontrolblock.cpp
         scheduler.h
-        fcfs.h fcfs.cpp
+        roundrobin.h roundrobin.cpp
         historydata.h historydata.cpp
 
         srtf.h srtf.cpp
-        priop.h priop.cpp
+        prio.h prio.cpp
+        prioe.h prioe.cpp
 
 
 

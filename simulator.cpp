@@ -3,8 +3,8 @@
 #include <QColor>
 #include <QFile>
 #include <QMessageBox>
-#include "fcfs.h"
-#include "priop.h"
+#include "prio.h"
+#include "roundrobin.h"
 #include "srtf.h"
 #include <algorithm>
 
@@ -23,19 +23,22 @@ Simulator::~Simulator()
     delete this->scheduler;
 }
 
-Scheduler *getScheduler(QString schedulerName, std::vector<QString> *errors)
+Scheduler *getScheduler(QString schedulerName, int alpha, std::vector<QString> *errors)
 {
-    if (schedulerName == "FCFS")
-    {
-        return new FCFS();
+    if (schedulerName == "RoundRobin") {
+        return new RoundRobin();
     }
-    if (schedulerName == "SRTF")
-    {
+
+    if (schedulerName == "SRTF") {
         return new SRTF();
     }
-    if (schedulerName == "PRIOP")
-    {
-        return new PRIOP();
+
+    if (schedulerName == "PRIO") {
+        return new PRIO();
+    }
+
+    if (schedulerName == "PROPe") {
+        return new PRIO();
     }
 
     errors->push_back("Nome de escalonador inválido");
@@ -71,7 +74,7 @@ std::vector<QString> Simulator::load(const QString filePath)
         return errors;
     }
 
-    auto scheduler = getScheduler(values[0], &errors);
+    auto scheduler = getScheduler(values[0], 0, &errors);
     int quantum = values[1].toInt();
 
     if (quantum < 1)
