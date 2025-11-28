@@ -1,8 +1,8 @@
-#include "prio.h"
+#include "priop.h"
 
-PRIO::PRIO() {}
+PRIOP::PRIOP() {}
 
-size_t PRIO::getNextTask(std::vector<TaskControlBlock *> tasks)
+size_t PRIOP::getNextTask(std::vector<TaskControlBlock *> tasks)
 {
     auto it_max = std::max_element(tasks.begin(),
                                    tasks.end(),

@@ -30,8 +30,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         historydata.h historydata.cpp
 
         srtf.h srtf.cpp
-        prio.h prio.cpp
-        prioe.h prioe.cpp
+        priop.h priop.cpp
+        priopa.h priopa.cpp
 
 
 

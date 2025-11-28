@@ -1,11 +1,11 @@
-#include "prioe.h"
+#include "priopa.h"
 
-PRIOe::PRIOe(int alpha)
+PRIOPa::PRIOPa(int alpha)
 {
     this->alpha = alpha;
 }
 
-size_t PRIOe::getNextTask(std::vector<TaskControlBlock *> tasks)
+size_t PRIOPa::getNextTask(std::vector<TaskControlBlock *> tasks)
 {
     auto it_max = std::max_element(tasks.begin(),
                                    tasks.end(),

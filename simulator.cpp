@@ -3,8 +3,8 @@
 #include <QColor>
 #include <QFile>
 #include <QMessageBox>
-#include "prio.h"
-#include "prioe.h"
+#include "priop.h"
+#include "priopa.h"
 #include "roundrobin.h"
 #include "srtf.h"
 #include <algorithm>
@@ -36,13 +36,13 @@ Scheduler *getScheduler(QString schedulerName, int alpha, std::vector<QString> *
         return new SRTF();
     }
 
-    if (schedulerName == "PRIO")
-    {
-        return new PRIO();
+    if (schedulerName == "PRIOP") {
+        return new PRIOP();
     }
 
-    if (schedulerName == "PRIOe") {
-        return new PRIOe(alpha);
+    // PRIOPe is in portuguese
+    if (schedulerName == "PRIOPa" || schedulerName == "PRIOPe") {
+        return new PRIOPa(alpha);
     }
 
     errors->push_back("Nome de escalonador inválido");
