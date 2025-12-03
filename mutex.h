@@ -8,7 +8,7 @@ class Mutex
 {
 private:
     std::queue<TaskControlBlock *> blockedTasks;
-    bool free;
+    bool free = true;
 
 public:
     Mutex();

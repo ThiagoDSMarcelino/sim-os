@@ -16,12 +16,10 @@ size_t PRIOPa::getNextTask(std::vector<TaskControlBlock *> tasks)
     size_t nextTaskIndex = std::distance(tasks.begin(), it_max);
 
     for (size_t i = 0; i < tasks.size(); i++) {
-        if (i == nextTaskIndex) {
-            continue;
-        }
-
         tasks.at(i)->incresseDynamicPriority(this->alpha);
     }
+
+    tasks.at(nextTaskIndex)->resetDynamicPriority();
 
     return nextTaskIndex;
 }

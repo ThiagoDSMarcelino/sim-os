@@ -283,6 +283,7 @@ void Simulator::runQuantum()
     this->loadTasks();
 
     TaskControlBlock *running_task = this->getRunningTask();
+    bool eventFailure = false;
 
     for (int count = this->quantum; count > 0; count--)
     {
@@ -299,17 +300,16 @@ void Simulator::runQuantum()
         std::vector<TaskControlBlock *> activeTasks;
 
         if (running_task != nullptr) {
-            bool failure = false;
-
             for (auto event : running_task->getInstantEvents()) {
-                qDebug() << event->getId() << " | " << event->getInstant();
+                qDebug() << "Event ID: " << event->getId()
+                         << " | Task ID: " << running_task->getId();
 
                 if (event->getType() == EventType::MutexLock) {
                     auto mutex = this->getMutex(event->getId());
 
                     if (!mutex->lock(running_task)) {
                         qDebug() << "Mutex lock failure";
-                        failure = true;
+                        eventFailure = true;
                         break;
                     }
 
@@ -333,7 +333,7 @@ void Simulator::runQuantum()
                 }
             }
 
-            if (failure) {
+            if (eventFailure) {
                 break;
             }
 
@@ -354,8 +354,7 @@ void Simulator::runQuantum()
         }
     }
 
-    if (running_task != nullptr && !running_task->hasFinish())
-    {
+    if (running_task != nullptr && !running_task->hasFinish() && !eventFailure) {
         this->active_tasks.push_back(running_task);
     }
 }
