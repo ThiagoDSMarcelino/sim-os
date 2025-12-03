@@ -1,8 +1,12 @@
 #include "taskcontrolblock.h"
 #include <QGuiApplication>
 
-TaskControlBlock::TaskControlBlock(
-    QString id, QColor color, int start_time, int duration, int priority)
+TaskControlBlock::TaskControlBlock(QString id,
+                                   QColor color,
+                                   int start_time,
+                                   int duration,
+                                   int priority,
+                                   std::vector<Event *> events)
 {
     this->id = id;
     this->color = color;
@@ -11,6 +15,7 @@ TaskControlBlock::TaskControlBlock(
     this->priority = priority;
     this->dynamicPriority = priority;
     this->elepsedTime = 0;
+    this->events = events;
 }
 
 QString const TaskControlBlock::getId()
@@ -74,4 +79,17 @@ void TaskControlBlock::incresseDynamicPriority(int alpha)
 void TaskControlBlock::resetDynamicPriority()
 {
     this->dynamicPriority = this->priority;
+}
+
+std::vector<Event *> TaskControlBlock::getInstantEvents()
+{
+    std::vector<Event *> instantEvents;
+
+    for (auto event : this->events) {
+        if (event->getInstant() == this->elepsedTime) {
+            instantEvents.push_back(event);
+        }
+    }
+
+    return instantEvents;
 }

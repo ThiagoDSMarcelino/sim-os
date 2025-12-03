@@ -41,7 +41,7 @@ Scheduler *getScheduler(QString schedulerName, int alpha, std::vector<QString> *
     }
 
     // PRIOPe is in portuguese
-    if (schedulerName == "PRIOPa" || schedulerName == "PRIOPe") {
+    if (schedulerName == "PRIOPa" || schedulerName == "PRIOPe" || schedulerName == "PRIOPEnv") {
         return new PRIOPa(alpha);
     }
 
@@ -105,8 +105,7 @@ std::vector<QString> Simulator::load(const QString filePath)
         line = in.readLine();
         values = line.split(";");
 
-        if (values.length() < 5)
-        {
+        if (values.length() < 5 || values.length() > 6) {
             errors.push_back("Formatação de uma tarefa está incorreta");
             continue;
         }
@@ -151,9 +150,52 @@ std::vector<QString> Simulator::load(const QString filePath)
             errors.push_back("A prioridade deve ser um valor entre 0 e 99");
         }
 
-        if (errors.empty())
-        {
-            tcb_list.push_back(new TaskControlBlock(id, color, start_time, duration, priority));
+        std::vector<Event *> events;
+        int instant;
+
+        QRegularExpression mutexLockRegex("^ML(\\d+):(\\d+)$");
+        QRegularExpression mutexUnlockRegex("^MU(\\d+):(\\d+)$");
+        QRegularExpressionMatch match;
+
+        if (values.length() == 6) {
+            for (auto &event : values.at(5).split(',')) {
+                if (event.startsWith("ML")) {
+                    match = mutexLockRegex.match(event);
+
+                    if (match.hasMatch()) {
+                        events.push_back(new Event(match.captured(1).toInt(),
+                                                   match.captured(2).toInt(),
+                                                   EventType::MutexLock));
+                    } else {
+                        errors.push_back("Evento de Mutex Lock mal formatado");
+                        qDebug() << event;
+                    }
+
+                    continue;
+                }
+
+                if (event.startsWith("MU")) {
+                    match = mutexUnlockRegex.match(event);
+
+                    if (match.hasMatch()) {
+                        events.push_back(new Event(match.captured(1).toInt(),
+                                                   match.captured(2).toInt(),
+                                                   EventType::MutexUnlock));
+                    } else {
+                        errors.push_back("Evento de Mutex Unlock mal formatado");
+                        qDebug() << event;
+                    }
+
+                    continue;
+                }
+
+                errors.push_back("Evento desconhecido");
+            }
+        }
+
+        if (errors.empty()) {
+            tcb_list.push_back(
+                new TaskControlBlock(id, color, start_time, duration, priority, events));
         }
     }
 
@@ -256,14 +298,50 @@ void Simulator::runQuantum()
 
         std::vector<TaskControlBlock *> activeTasks;
 
-        if (running_task != nullptr)
-        {
+        if (running_task != nullptr) {
+            bool failure = false;
+
+            for (auto event : running_task->getInstantEvents()) {
+                qDebug() << event->getId() << " | " << event->getInstant();
+
+                if (event->getType() == EventType::MutexLock) {
+                    auto mutex = this->getMutex(event->getId());
+
+                    if (!mutex->lock(running_task)) {
+                        qDebug() << "Mutex lock failure";
+                        failure = true;
+                        break;
+                    }
+
+                    qDebug() << "Mutex lock success";
+
+                    continue;
+                }
+
+                if (event->getType() == EventType::MutexUnlock) {
+                    qDebug() << "Mutex unlock";
+
+                    auto mutex = this->getMutex(event->getId());
+
+                    auto unblockedTask = mutex->unlock();
+
+                    if (unblockedTask != nullptr) {
+                        this->active_tasks.push_back(unblockedTask);
+                    }
+
+                    continue;
+                }
+            }
+
+            if (failure) {
+                break;
+            }
+
             running_task->run();
             activeTasks.push_back(running_task);
         }
 
-        for (auto task : this->active_tasks)
-        {
+        for (auto task : this->active_tasks) {
             activeTasks.push_back(task);
         }
 
@@ -271,8 +349,7 @@ void Simulator::runQuantum()
 
         this->time++;
 
-        if (running_task != nullptr && running_task->hasFinish())
-        {
+        if (running_task != nullptr && running_task->hasFinish()) {
             break;
         }
     }
@@ -314,4 +391,15 @@ bool const Simulator::hasFinished()
     }
 
     return true;
+}
+
+void Simulator::sleepTask(QString id) {}
+
+void Simulator::wakeTask(QString id) {}
+
+Mutex *Simulator::getMutex(int id)
+{
+    auto [iter, inserted] = this->mutexes.try_emplace(id, new Mutex());
+
+    return iter->second;
 }
