@@ -6,7 +6,8 @@ TaskControlBlock::TaskControlBlock(QString id,
                                    int start_time,
                                    int duration,
                                    int priority,
-                                   std::vector<Event *> events)
+                                   std::vector<MutexEvent *> mutexEvents,
+                                   std::vector<IOEvent *> ioEvents)
 {
     this->id = id;
     this->color = color;
@@ -15,7 +16,8 @@ TaskControlBlock::TaskControlBlock(QString id,
     this->priority = priority;
     this->dynamicPriority = priority;
     this->elepsedTime = 0;
-    this->events = events;
+    this->mutexEvents = mutexEvents;
+    this->ioEvents = ioEvents;
 }
 
 QString const TaskControlBlock::getId()
@@ -81,11 +83,24 @@ void TaskControlBlock::resetDynamicPriority()
     this->dynamicPriority = this->priority;
 }
 
-std::vector<Event *> TaskControlBlock::getInstantEvents()
+std::vector<MutexEvent *> TaskControlBlock::getMutexEvents()
 {
-    std::vector<Event *> instantEvents;
+    std::vector<MutexEvent *> instantEvents;
 
-    for (auto event : this->events) {
+    for (auto event : this->mutexEvents) {
+        if (event->getInstant() == this->elepsedTime) {
+            instantEvents.push_back(event);
+        }
+    }
+
+    return instantEvents;
+}
+
+std::vector<IOEvent *> TaskControlBlock::getIOEvents()
+{
+    std::vector<IOEvent *> instantEvents;
+
+    for (auto event : this->ioEvents) {
         if (event->getInstant() == this->elepsedTime) {
             instantEvents.push_back(event);
         }

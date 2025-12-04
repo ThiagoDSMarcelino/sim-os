@@ -3,7 +3,8 @@
 
 #include <QColor>
 #include <QString>
-#include "event.h"
+#include "ioevent.h"
+#include "mutexevent.h"
 
 #define MAX_PRIORITY 99
 #define MIN_PRIORITY 0
@@ -16,7 +17,8 @@ public:
                      int start_time,
                      int duration,
                      int priority,
-                     std::vector<Event *> events);
+                     std::vector<MutexEvent *> mutexEvents,
+                     std::vector<IOEvent *> ioEvents);
 
     QString const getId();
     int const getPriority();
@@ -28,7 +30,8 @@ public:
     int const getDynamicPriority();
     void incresseDynamicPriority(int alpha);
     void resetDynamicPriority();
-    std::vector<Event *> getInstantEvents();
+    std::vector<MutexEvent *> getMutexEvents();
+    std::vector<IOEvent *> getIOEvents();
 
 private:
     QString id;
@@ -38,7 +41,8 @@ private:
     int priority;
     int dynamicPriority;
     int elepsedTime;
-    std::vector<Event *> events;
+    std::vector<MutexEvent *> mutexEvents;
+    std::vector<IOEvent *> ioEvents;
 };
 
 #endif // TASKCONTROLBLOCK_H

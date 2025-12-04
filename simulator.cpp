@@ -150,11 +150,13 @@ std::vector<QString> Simulator::load(const QString filePath)
             errors.push_back("A prioridade deve ser um valor entre 0 e 99");
         }
 
-        std::vector<Event *> events;
+        std::vector<MutexEvent *> mutexEvents;
+        std::vector<IOEvent *> ioEvents;
         int instant;
 
         QRegularExpression mutexLockRegex("^ML(\\d+):(\\d+)$");
         QRegularExpression mutexUnlockRegex("^MU(\\d+):(\\d+)$");
+        QRegularExpression IORegex("^IO:(\\d+)-(\\d+)$");
         QRegularExpressionMatch match;
 
         if (values.length() == 6) {
@@ -163,9 +165,9 @@ std::vector<QString> Simulator::load(const QString filePath)
                     match = mutexLockRegex.match(event);
 
                     if (match.hasMatch()) {
-                        events.push_back(new Event(match.captured(1).toInt(),
-                                                   match.captured(2).toInt(),
-                                                   EventType::MutexLock));
+                        mutexEvents.push_back(new MutexEvent(match.captured(1).toInt(),
+                                                             match.captured(2).toInt(),
+                                                             MutexEventType::MutexLock));
                     } else {
                         errors.push_back("Evento de Mutex Lock mal formatado");
                         qDebug() << event;
@@ -178,11 +180,25 @@ std::vector<QString> Simulator::load(const QString filePath)
                     match = mutexUnlockRegex.match(event);
 
                     if (match.hasMatch()) {
-                        events.push_back(new Event(match.captured(1).toInt(),
-                                                   match.captured(2).toInt(),
-                                                   EventType::MutexUnlock));
+                        mutexEvents.push_back(new MutexEvent(match.captured(1).toInt(),
+                                                             match.captured(2).toInt(),
+                                                             MutexEventType::MutexUnlock));
                     } else {
                         errors.push_back("Evento de Mutex Unlock mal formatado");
+                        qDebug() << event;
+                    }
+
+                    continue;
+                }
+
+                if (event.startsWith("IO")) {
+                    match = IORegex.match(event);
+
+                    if (match.hasMatch()) {
+                        ioEvents.push_back(
+                            new IOEvent(match.captured(1).toInt(), match.captured(2).toInt() + 1));
+                    } else {
+                        errors.push_back("Evento de IO mal formatado");
                         qDebug() << event;
                     }
 
@@ -194,8 +210,8 @@ std::vector<QString> Simulator::load(const QString filePath)
         }
 
         if (errors.empty()) {
-            tcb_list.push_back(
-                new TaskControlBlock(id, color, start_time, duration, priority, events));
+            tcb_list.push_back(new TaskControlBlock(
+                id, color, start_time, duration, priority, mutexEvents, ioEvents));
         }
     }
 
@@ -284,6 +300,7 @@ void Simulator::runQuantum()
 
     TaskControlBlock *running_task = this->getRunningTask();
     bool eventFailure = false;
+    bool ioSyscall = false;
 
     for (int count = this->quantum; count > 0; count--)
     {
@@ -300,11 +317,11 @@ void Simulator::runQuantum()
         std::vector<TaskControlBlock *> activeTasks;
 
         if (running_task != nullptr) {
-            for (auto event : running_task->getInstantEvents()) {
+            for (auto event : running_task->getMutexEvents()) {
                 qDebug() << "Event ID: " << event->getId()
                          << " | Task ID: " << running_task->getId();
 
-                if (event->getType() == EventType::MutexLock) {
+                if (event->getType() == MutexEventType::MutexLock) {
                     auto mutex = this->getMutex(event->getId());
 
                     if (!mutex->lock(running_task)) {
@@ -318,7 +335,7 @@ void Simulator::runQuantum()
                     continue;
                 }
 
-                if (event->getType() == EventType::MutexUnlock) {
+                if (event->getType() == MutexEventType::MutexUnlock) {
                     qDebug() << "Mutex unlock";
 
                     auto mutex = this->getMutex(event->getId());
@@ -331,6 +348,21 @@ void Simulator::runQuantum()
 
                     continue;
                 }
+            }
+
+            auto ioEvents = running_task->getIOEvents();
+            if (!ioEvents.empty()) {
+                int maxDuration = 0;
+
+                for (auto event : ioEvents) {
+                    if (maxDuration < event->getDuration()) {
+                        maxDuration = event->getDuration();
+                    }
+                }
+
+                this->sleepingTasks.push_back(new SleepingTask(running_task, maxDuration));
+                qDebug() << "Task ID: " << running_task->getId() << " | Duration: " << maxDuration;
+                ioSyscall = true;
             }
 
             if (eventFailure) {
@@ -348,13 +380,18 @@ void Simulator::runQuantum()
         this->history.push_back(HistoryData(this->time, running_task, activeTasks));
 
         this->time++;
+        this->updateSleepingTasks();
+
+        if (ioSyscall || eventFailure) {
+            break;
+        }
 
         if (running_task != nullptr && running_task->hasFinish()) {
             break;
         }
     }
 
-    if (running_task != nullptr && !running_task->hasFinish() && !eventFailure) {
+    if (running_task != nullptr && !running_task->hasFinish() && !eventFailure && !ioSyscall) {
         this->active_tasks.push_back(running_task);
     }
 }
@@ -401,4 +438,21 @@ Mutex *Simulator::getMutex(int id)
     auto [iter, inserted] = this->mutexes.try_emplace(id, new Mutex());
 
     return iter->second;
+}
+
+void Simulator::updateSleepingTasks()
+{
+    for (auto it = this->sleepingTasks.begin(); it != this->sleepingTasks.end();) {
+        auto sleepingTask = *it;
+
+        sleepingTask->runTime();
+
+        if (!sleepingTask->hasFinish()) {
+            it++;
+            continue;
+        }
+
+        this->active_tasks.push_back(sleepingTask->getTask());
+        it = this->sleepingTasks.erase(it);
+    }
 }

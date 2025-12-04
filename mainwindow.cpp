@@ -109,6 +109,7 @@ void MainWindow::on_fullSimulationButton_clicked()
         this->simulator->runQuantum();
     }
 
+    ui->nextQuantumButton->setDisabled(true);
     updateGanttChart();
 }
 

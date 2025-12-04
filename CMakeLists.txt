@@ -33,9 +33,11 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         priop.h priop.cpp
         priopa.h priopa.cpp
 
-        eventtype.h
-        event.h event.cpp
+        mutexeventtype.h
+        mutexevent.h mutexevent.cpp
         mutex.h mutex.cpp
+        ioevent.h ioevent.cpp
+        sleepingtask.h sleepingtask.cpp
 
 
 

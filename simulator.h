@@ -6,6 +6,7 @@
 #include "historydata.h"
 #include "mutex.h"
 #include "scheduler.h"
+#include "sleepingtask.h"
 #include "taskcontrolblock.h"
 #include <map>
 #include <vector>
@@ -34,6 +35,9 @@ private:
     std::map<int, Mutex *> mutexes;
 
     Mutex *getMutex(int id);
+
+    std::vector<SleepingTask *> sleepingTasks;
+    void updateSleepingTasks();
 
 public:
     static std::vector<QString> load(const QString filePath);
