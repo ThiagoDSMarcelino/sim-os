@@ -197,7 +197,9 @@ void MainWindow::on_saveButton_clicked()
         return;
     }
 
-    filePath += ".png";
+    if (!filePath.endsWith(".png")) {
+        filePath += ".png";
+    }
 
     QPixmap pixmap = this->ui->graphicsView->grab();
 
