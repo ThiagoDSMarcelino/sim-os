@@ -80,6 +80,8 @@ void TaskControlBlock::incresseDynamicPriority(int alpha)
 
 void TaskControlBlock::resetDynamicPriority()
 {
+    this->previousDynamicPriorities.push(this->dynamicPriority);
+
     this->dynamicPriority = this->priority;
 }
 
@@ -107,4 +109,19 @@ std::vector<IOEvent *> TaskControlBlock::getIOEvents()
     }
 
     return instantEvents;
+}
+
+void TaskControlBlock::undoRun()
+{
+    if (this->elepsedTime <= 0) {
+        qDebug() << "Tarefa ja esta no estado inicial";
+        return;
+    }
+
+    if (!this->previousDynamicPriorities.empty()) {
+        this->dynamicPriority = this->previousDynamicPriorities.front();
+        this->previousDynamicPriorities.pop();
+    }
+
+    this->elepsedTime--;
 }

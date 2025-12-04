@@ -63,7 +63,7 @@ void MainWindow::on_selectFileButton_clicked()
     }
 
     for (const QString &error : errors) {
-        ui->messagesList->addItem(error);
+        this->ui->messagesList->addItem(error);
     }
 }
 
@@ -73,9 +73,10 @@ void MainWindow::on_startSimulationButton_clicked()
         return;
     }
 
-    ui->stackedWidget->setCurrentIndex(1);
+    this->ui->stackedWidget->setCurrentIndex(1);
 
     this->simulator->start();
+    this->ui->previousQuantunButton->setDisabled(true);
 
     updateGanttChart();
 }
@@ -90,8 +91,9 @@ void MainWindow::on_nextQuantumButton_clicked()
 
     updateGanttChart();
 
+    this->ui->previousQuantunButton->setDisabled(false);
     if (this->simulator->hasFinished()) {
-        ui->nextQuantumButton->setDisabled(true);
+        this->ui->nextQuantumButton->setDisabled(true);
     }
 }
 
@@ -101,7 +103,7 @@ void MainWindow::on_fullSimulationButton_clicked()
         return;
     }
 
-    ui->stackedWidget->setCurrentIndex(1);
+    this->ui->stackedWidget->setCurrentIndex(1);
 
     this->simulator->start();
 
@@ -109,7 +111,8 @@ void MainWindow::on_fullSimulationButton_clicked()
         this->simulator->runQuantum();
     }
 
-    ui->nextQuantumButton->setDisabled(true);
+    this->ui->previousQuantunButton->setDisabled(false);
+    this->ui->nextQuantumButton->setDisabled(true);
     updateGanttChart();
 }
 
@@ -179,7 +182,7 @@ void MainWindow::updateGanttChart()
         time++;
     }
 
-    ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
+    this->ui->graphicsView->fitInView(scene->itemsBoundingRect(), Qt::KeepAspectRatio);
 }
 
 void MainWindow::on_saveButton_clicked()
@@ -203,4 +206,17 @@ void MainWindow::on_saveButton_clicked()
                              tr("Erro ao Salvar"),
                              tr("Não foi possível salvar a imagem no local especificado."));
     }
+}
+
+void MainWindow::on_previousQuantunButton_clicked()
+{
+    this->simulator->undoQuantun();
+
+    updateGanttChart();
+
+    if (this->simulator->getHistory().size() <= 1) {
+        this->ui->previousQuantunButton->setDisabled(true);
+    }
+
+    this->ui->nextQuantumButton->setDisabled(false);
 }

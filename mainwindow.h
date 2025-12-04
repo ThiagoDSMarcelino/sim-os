@@ -29,6 +29,8 @@ private slots:
 
     void on_saveButton_clicked();
 
+    void on_previousQuantunButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 

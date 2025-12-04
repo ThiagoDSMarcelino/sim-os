@@ -2,11 +2,13 @@
 
 HistoryData::HistoryData(int instant,
                          TaskControlBlock *runningTaks,
-                         std::vector<TaskControlBlock *> activeTasks)
+                         std::vector<TaskControlBlock *> activeTasks,
+                         std::vector<std::tuple<TaskControlBlock *, int>> wakedTasks)
 {
     this->instant = instant;
     this->runningTask = runningTaks;
     this->activeTasks = activeTasks;
+    this->wakedTasks = wakedTasks;
 }
 
 TaskControlBlock *HistoryData::getRunningTask()
@@ -22,4 +24,9 @@ std::vector<TaskControlBlock *> HistoryData::getActiveTasks()
 int HistoryData::getInstant()
 {
     return this->instant;
+}
+
+std::vector<std::tuple<TaskControlBlock *, int>> HistoryData::getWakedTasks()
+{
+    return this->wakedTasks;
 }

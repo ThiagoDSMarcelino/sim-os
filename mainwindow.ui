@@ -18,7 +18,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="configPage">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -57,6 +57,13 @@
          <widget class="QPushButton" name="nextQuantumButton">
           <property name="text">
            <string>Avançar</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="previousQuantunButton">
+          <property name="text">
+           <string>Retroceder</string>
           </property>
          </widget>
         </item>

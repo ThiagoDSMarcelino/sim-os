@@ -5,6 +5,7 @@
 #include <QString>
 #include "ioevent.h"
 #include "mutexevent.h"
+#include <queue>
 
 #define MAX_PRIORITY 99
 #define MIN_PRIORITY 0
@@ -32,6 +33,7 @@ public:
     void resetDynamicPriority();
     std::vector<MutexEvent *> getMutexEvents();
     std::vector<IOEvent *> getIOEvents();
+    void undoRun();
 
 private:
     QString id;
@@ -43,6 +45,7 @@ private:
     int elepsedTime;
     std::vector<MutexEvent *> mutexEvents;
     std::vector<IOEvent *> ioEvents;
+    std::queue<int> previousDynamicPriorities;
 };
 
 #endif // TASKCONTROLBLOCK_H

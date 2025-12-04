@@ -9,6 +9,7 @@
 #include "sleepingtask.h"
 #include "taskcontrolblock.h"
 #include <map>
+#include <tuple>
 #include <vector>
 
 class Simulator
@@ -37,7 +38,7 @@ private:
     Mutex *getMutex(int id);
 
     std::vector<SleepingTask *> sleepingTasks;
-    void updateSleepingTasks();
+    std::vector<std::tuple<TaskControlBlock *, int>> updateSleepingTasks();
 
 public:
     static std::vector<QString> load(const QString filePath);
@@ -49,8 +50,7 @@ public:
     int getTime();
     std::vector<HistoryData> getHistory();
     bool const hasFinished();
-    void sleepTask(QString id);
-    void wakeTask(QString id);
+    void undoQuantun();
 };
 
 #endif // SIMULATOR_H

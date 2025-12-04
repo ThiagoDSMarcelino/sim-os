@@ -320,10 +320,9 @@ void Simulator::runQuantum()
             for (auto event : running_task->getMutexEvents()) {
                 qDebug() << "Event ID: " << event->getId()
                          << " | Task ID: " << running_task->getId();
+                auto mutex = this->getMutex(event->getId());
 
                 if (event->getType() == MutexEventType::MutexLock) {
-                    auto mutex = this->getMutex(event->getId());
-
                     if (!mutex->lock(running_task)) {
                         qDebug() << "Mutex lock failure";
                         eventFailure = true;
@@ -337,8 +336,6 @@ void Simulator::runQuantum()
 
                 if (event->getType() == MutexEventType::MutexUnlock) {
                     qDebug() << "Mutex unlock";
-
-                    auto mutex = this->getMutex(event->getId());
 
                     auto unblockedTask = mutex->unlock();
 
@@ -377,10 +374,11 @@ void Simulator::runQuantum()
             activeTasks.push_back(task);
         }
 
-        this->history.push_back(HistoryData(this->time, running_task, activeTasks));
+        auto wakedTasks = this->updateSleepingTasks();
+
+        this->history.push_back(HistoryData(this->time, running_task, activeTasks, wakedTasks));
 
         this->time++;
-        this->updateSleepingTasks();
 
         if (ioSyscall || eventFailure) {
             break;
@@ -429,10 +427,6 @@ bool const Simulator::hasFinished()
     return true;
 }
 
-void Simulator::sleepTask(QString id) {}
-
-void Simulator::wakeTask(QString id) {}
-
 Mutex *Simulator::getMutex(int id)
 {
     auto [iter, inserted] = this->mutexes.try_emplace(id, new Mutex());
@@ -440,8 +434,10 @@ Mutex *Simulator::getMutex(int id)
     return iter->second;
 }
 
-void Simulator::updateSleepingTasks()
+std::vector<std::tuple<TaskControlBlock *, int>> Simulator::updateSleepingTasks()
 {
+    std::vector<std::tuple<TaskControlBlock *, int>> wakedTasks;
+
     for (auto it = this->sleepingTasks.begin(); it != this->sleepingTasks.end();) {
         auto sleepingTask = *it;
 
@@ -454,5 +450,100 @@ void Simulator::updateSleepingTasks()
 
         this->active_tasks.push_back(sleepingTask->getTask());
         it = this->sleepingTasks.erase(it);
+
+        wakedTasks.push_back(std::make_tuple(sleepingTask->getTask(), sleepingTask->getDuration()));
     }
+
+    return wakedTasks;
+}
+
+void Simulator::undoQuantun()
+{
+    this->time--;
+    auto historyData = this->history.back();
+    this->history.pop_back();
+
+    auto runningTask = historyData.getRunningTask();
+
+    runningTask->undoRun();
+
+    for (auto event : runningTask->getMutexEvents()) {
+        auto mutex = this->getMutex(event->getId());
+
+        if (event->getType() == MutexEventType::MutexLock) {
+            auto unblockedTask = mutex->unlock();
+
+            if (unblockedTask != nullptr) {
+                this->active_tasks.push_back(unblockedTask);
+            }
+
+            continue;
+        }
+
+        if (event->getType() == MutexEventType::MutexUnlock) {
+            if (!mutex->lock(runningTask)) {
+                qDebug() << "ERROR: Mutex lock failure";
+                break;
+            }
+
+            continue;
+        }
+    }
+
+    auto ioEvents = runningTask->getIOEvents();
+    if (!ioEvents.empty()) {
+        for (auto it = this->sleepingTasks.begin(); it != this->sleepingTasks.end();) {
+            auto sleepingTask = *it;
+
+            if (sleepingTask->getTask()->getId() == runningTask->getId()) {
+                it = this->sleepingTasks.erase(it);
+            }
+        }
+    }
+
+    for (auto spleepingTask : this->sleepingTasks) {
+        spleepingTask->undoRunTime();
+    }
+
+    for (auto pair : historyData.getWakedTasks()) {
+        auto task = std::get<0>(pair);
+        auto duration = std::get<1>(pair);
+
+        for (auto it = this->active_tasks.begin(); it != this->active_tasks.end();) {
+            auto activeTask = *it;
+
+            if (activeTask->getId() == task->getId()) {
+                this->active_tasks.erase(it);
+                continue;
+            }
+
+            it++;
+        }
+
+        this->sleepingTasks.push_back(new SleepingTask(task, duration - 1));
+    }
+
+    for (auto task : this->active_tasks) {
+        if (task->getStartTime() == historyData.getInstant()) {
+            this->loaded_tasks.pop_back();
+        }
+    }
+
+    if (runningTask->getStartTime() == historyData.getInstant()) {
+        return;
+    }
+
+    bool taskAlreadyInActiveTasks = false;
+    for (auto task : this->active_tasks) {
+        if (task->getId() == runningTask->getId()) {
+            taskAlreadyInActiveTasks = true;
+            break;
+        }
+    }
+
+    if (taskAlreadyInActiveTasks) {
+        return;
+    }
+
+    this->active_tasks.push_back(runningTask);
 }
